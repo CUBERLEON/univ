@@ -1,0 +1,24 @@
+iterations=1000000
+
+### Debug ###
+input-1024.txt
+   MPI    OpenMP
+1:    33.4s
+2: 16.9s  17.3s
+4: 8.7s   8.6s
+8: 6.6s   6.7s
+
+input-2048.txt  
+   MPI    OpenMP
+1:    65.8s
+2: 33.7s  33s
+4: 17.7s  17.2s
+8: 13.1s  12.4s
+
+### Release ###
+input-2048.txt
+   MPI    OpenMP
+1:     35s
+2: 15.7s  19s
+4: 7.8s   9.8s
+8: 4.5s   5.5s
