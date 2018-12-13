@@ -1,0 +1,79 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<title>First-order sequent prover</title>
+		<link rel="stylesheet" href="css/materialize.min.css" type="text/css">
+		<link rel="stylesheet" href="css/main.css" type="text/css">
+	</head>
+	<body>
+        <div id="title">
+            <h4>First-order sequent prover</h4>
+        </div>
+
+		<form id="formula-form" class="col s12">
+			<div id="formula-div" class="input-field col s12">
+				<input id="formula-input" type="text" name="FormulaInput">
+				<label for="FormulaInput" data-error="unacceptable" class="active">Formula</label>
+			</div>
+            <div>
+			    <button class="btn waves-effect waves-light" type="submit" value="Prove">Prove</button>
+            </div>
+		</form>
+
+		<div id="statusBox">
+            <div id="statusCard" class="card horizontal">
+                <div class="card-stacked">
+                    <div class="card-content">
+            			<div id="statusHeader"> </div>
+            			<div id="status"> </div>
+                    </div>
+                </div>
+            </div>
+			<div><button id="statusStop" class="btn">stop</button></div>
+		</div>
+
+		<div id="model"> </div>
+		<div id="rootAnchor"> </div>
+
+		<!--<div id="paintBar">
+			<button id="paintStop" class="btn">stop</button>
+			<button id="paintFaster" class="btn">faster</button>
+		</div>-->
+
+		<script type='text/javascript' src='js/array.js'></script>
+		<script type='text/javascript' src='js/translator.js'></script>
+		<script type='text/javascript' src='js/prover.js'></script>
+		<script type='text/javascript' src='js/sentree.js'></script>
+		<script type='text/javascript' src='js/painter.js'></script>
+		<script type='text/javascript' src='js/index.js'></script>
+		<script type='text/javascript' src='js/jquery-3.1.1.min.js'></script>
+		<script type='text/javascript' src='js/materialize.min.js'></script>
+
+		<div id="examples">
+			<script type="text/javascript">
+			var examples = [
+				"(A\\lor (B\\land C))\\to ((A\\lor B)\\land (A\\lor C))",
+				"((A\\to B)\\to A)\\to A",
+				"\\exists y\\forall x(Fy\\to Fx)",
+				"\\exists y\\exists z\\forall x((Fx\\to Gy)\\land (Gz\\to Fx))\\to\\forall x\\exists y(Fx\\leftrightarrow Gy)",
+				"\\forally\\existsx Fxy \\to \\existsx\\forally Fxy"
+			];
+			document.write("<ul>\n");
+			document.write("<li>Examples:</li>\n");
+			for (var i=0; i<examples.length; i++) {
+				document.write("<li><a class='formula' href='index.html?f=" + examples[i] + "' onclick='with (document.forms[0]) { FormulaInput.value=\"" + laTeX2html(examples[i].replace(/\\/g, "\\\\")) + "\"; onsubmit(); }; return false'>" + laTeX2html(examples[i]) + "</a></li>\n");
+			}
+			document.write("</ul>\n");
+			</script>
+		</div>
+
+        <div id="footer">
+            <h6>© 2016 - Liubomyr Piadyk</h6>
+        </div>
+
+        <div id="fixed-image" onclick="changeFixedImage()">
+            <img src="imgs/0.png">
+        </div>
+	</body>
+</html>

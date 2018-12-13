@@ -1,0 +1,35 @@
+body { text-align: center; }
+
+#formula-form { display: block; margin:0 auto; width: 75%; }
+#formula-form div { display: inline-block; margin: 10px 5px; }
+#formula-form #formula-div { width: 60%; }
+
+#symboltd { padding:10px 20px 3px 1px; }
+#submittd { width:50px; padding:0 10px; }
+
+#statusBox { text-align:center; display:none; position: relative; }
+#statusBox .card { display: inline-block; }
+#statusBox .green-status { box-shadow: 0 2px 2px 0 #4caf50, -1px -2px 5px 0 #4caf50, 0px 0px 6px 1px #4caf50; }
+#statusBox .red-status { box-shadow: 0 2px 2px 0 #f44336, -1px -2px 5px 0 #f44336, 0px 0px 6px 1px #f44336; }
+
+#model { margin:0 30px; width:90%; max-width:800px; padding:3px 20px; text-align:center; display:none; }
+#model b { color:#600; }
+#model table { margin:auto; border:1px solid #600; }
+#rootAnchor { display: inline-block; position:relative; margin-top:15px; }
+
+.treeNode, .treeNodeHiParent, .treeNodeHiChild { white-space:nowrap; color:#666; text-align:center; }
+.treeNodeHiParent { background-color:#26a69a; color: #fff; border:1px dotted #000; }
+.treeNodeHiChild { background-color:#26a69a; color: #fff; border:1px dotted #000; }
+.formula { color:#000; text-decoration:none; }
+
+#paintBar { position:fixed; right:20px; bottom:10px; background-color:#fff; display:none; }
+
+#examples { width: 70%; margin: 0 auto;}
+#examples ul { display: inline-block;  }
+#examples p, ul { margin: 3px 0; text-align: left; }
+#examples li { padding:0.1em; }
+
+#footer { position: fixed; bottom: 10px; left: 10px; }
+
+#fixed-image { position: fixed; top: 0px; right: 0px; width: 15%; }
+#fixed-image img { width: 100%; height: auto; }
