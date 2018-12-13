@@ -1,0 +1,187 @@
+{
+  "filePath": "test.json",
+  "tables": {
+    "schedule": {
+      "name": "schedule",
+      "rows": [
+        {
+          "elements": {
+            "qq": {
+              "column": "qq"
+            },
+            "name": {
+              "column": "name"
+            },
+            "id": {
+              "value": "123",
+              "column": "id"
+            },
+            "time": {
+              "value": "10:00...20:00",
+              "column": "time"
+            }
+          }
+        },
+        {
+          "elements": {
+            "qq": {
+              "value": "a...z",
+              "column": "qq"
+            },
+            "name": {
+              "column": "name"
+            },
+            "id": {
+              "value": "123",
+              "column": "id"
+            },
+            "time": {
+              "value": "04:00...23:00",
+              "column": "time"
+            }
+          }
+        },
+        {
+          "elements": {
+            "qq": {
+              "value": "a...b",
+              "column": "qq"
+            },
+            "name": {
+              "column": "name"
+            },
+            "id": {
+              "column": "id"
+            },
+            "time": {
+              "column": "time"
+            }
+          }
+        }
+      ],
+      "columns": {
+        "qq": {
+          "type": "STR_RANGE",
+          "name": "qq",
+          "nullAllowed": true,
+          "unique": false
+        },
+        "name": {
+          "type": "STR",
+          "name": "name",
+          "nullAllowed": true,
+          "unique": false
+        },
+        "id": {
+          "type": "INT",
+          "name": "id",
+          "nullAllowed": true,
+          "unique": false
+        },
+        "time": {
+          "type": "TIME_RANGE",
+          "name": "time",
+          "nullAllowed": true,
+          "unique": false
+        }
+      }
+    },
+    "cats": {
+      "name": "cats",
+      "rows": [
+        {
+          "elements": {
+            "name": {
+              "value": "Bob",
+              "column": "name"
+            },
+            "id": {
+              "value": "13",
+              "column": "id"
+            }
+          }
+        },
+        {
+          "elements": {
+            "name": {
+              "value": "Vasia",
+              "column": "name"
+            },
+            "id": {
+              "value": "7",
+              "column": "id"
+            }
+          }
+        },
+        {
+          "elements": {
+            "name": {
+              "value": "Unknown",
+              "column": "name"
+            },
+            "id": {
+              "value": "153",
+              "column": "id"
+            }
+          }
+        },
+        {
+          "elements": {
+            "name": {
+              "value": "Kiriusha",
+              "column": "name"
+            },
+            "id": {
+              "value": "1",
+              "column": "id"
+            }
+          }
+        },
+        {
+          "elements": {
+            "name": {
+              "value": "Petro",
+              "column": "name"
+            },
+            "id": {
+              "value": "123",
+              "column": "id"
+            }
+          }
+        }
+      ],
+      "columns": {
+        "name": {
+          "type": "STR",
+          "name": "name",
+          "nullAllowed": true,
+          "unique": false
+        },
+        "id": {
+          "type": "INT",
+          "name": "id",
+          "nullAllowed": true,
+          "unique": false
+        }
+      }
+    },
+    "students": {
+      "name": "students",
+      "rows": [],
+      "columns": {
+        "name": {
+          "type": "STR",
+          "name": "name",
+          "nullAllowed": true,
+          "unique": false
+        },
+        "id": {
+          "type": "INT",
+          "name": "id",
+          "nullAllowed": true,
+          "unique": false
+        }
+      }
+    }
+  }
+}
