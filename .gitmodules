@@ -13,3 +13,9 @@
 [submodule "cpp/tanks-multiplayer"]
 	path = cpp/tanks-multiplayer
 	url = git@github.com:CUBERLEON/tanks-multiplayer.git
+[submodule "cloud/gcloud-ml"]
+	path = cloud/gcloud-ml
+	url = git@github.com:CUBERLEON/gcloud-ml.git
+[submodule "crypto/number"]
+	path = crypto/number
+	url = git@github.com:CUBERLEON/number.git
