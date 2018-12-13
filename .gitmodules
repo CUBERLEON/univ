@@ -1,0 +1,15 @@
+[submodule "logic/sequent-prover"]
+	path = logic/sequent-prover
+	url = git@github.com:CUBERLEON/sequent-prover.git
+[submodule "java/java-technologies"]
+	path = java/java-technologies
+	url = git@github.com:CUBERLEON/java-technologies.git
+[submodule "java/database-manager"]
+	path = java/database-manager
+	url = git@github.com:CUBERLEON/database-manager.git
+[submodule "cpp/racing"]
+	path = cpp/racing
+	url = git@github.com:CUBERLEON/racing.git
+[submodule "cpp/tanks-multiplayer"]
+	path = cpp/tanks-multiplayer
+	url = git@github.com:CUBERLEON/tanks-multiplayer.git
