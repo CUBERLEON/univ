@@ -1,8 +1,5 @@
-import sys
 from copy import copy
 from random import randint
-
-import numpy as np
 
 maxPairCount = 4
 INF = 100000000

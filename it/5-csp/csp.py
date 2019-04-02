@@ -3,7 +3,7 @@ from time import time
 from table import *
 
 
-def MRV():
+def mrv():
     roz = []
     not_ready = [(INF, x) for x in req]
     tb = Table(teachers, groups)
@@ -13,7 +13,7 @@ def MRV():
             not_ready[i] = (tb.ok_count(val), val)
 
         not_ready.sort()
-       # print(not_ready)
+        # print(not_ready)
 
         pos = tb.get_first(not_ready[0][1])
         if pos == None:
@@ -30,7 +30,7 @@ def MRV():
     paint(roz)
 
 
-def range_evr():
+def step_evr():
     roz = []
     not_ready = [(INF, x) for x in req]
     tb = Table(teachers, groups)
@@ -45,7 +45,7 @@ def range_evr():
             not_ready[i] = (count(val), val)
 
         not_ready.sort()
-      #  print(not_ready)
+        #  print(not_ready)
 
         pos = tb.get_first(not_ready[0][1])
         if pos == None:
@@ -62,7 +62,7 @@ def range_evr():
     paint(roz)
 
 
-def LCV():
+def lcv():
     roz = []
     not_ready = [(INF, x) for x in req]
     tb = Table(teachers, groups)
@@ -91,7 +91,7 @@ def LCV():
             not_ready[i] = (total_ok, val)
 
         not_ready.sort()
-        #print(not_ready)
+        # print(not_ready)
 
         pos = tb.get_first(not_ready[0][1])
         if pos == None:
@@ -124,6 +124,7 @@ def forward_check(cands_key, cands_val, roz):
             qq = cands_key[i].copy()
             qq.extend([q1, q2])
             qq = tuple(qq)
+
             def inters_gr(gr1, gr2):
                 m1 = gr1.split(':')
                 m2 = gr2.split(':')
@@ -166,15 +167,16 @@ def forward_checking():
     forward_check(req_cpy, val, [])
 
 
-def constraint_propagation():
+def constraint_prop():
     forward_checking()
 
 
 if __name__ == "__main__":
-    func = [
-        forward_checking, LCV, range_evr, MRV,constraint_propagation]
+    func = [mrv, step_evr, lcv, forward_checking, constraint_prop]
+
+    print(f"req_cnt = {len(req)}, teacher_cnt = {len(teachers)}, groups_cnt = {len(groups)}")
 
     for x in func:
         t = time()
         x()
-        print("for func = ",x," time = ", time() - t)
+        print(f"func = {x.__name__}, time = {(time() - t) * 1000.:.3f}ms")

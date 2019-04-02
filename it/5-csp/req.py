@@ -94,9 +94,9 @@ NOM_ID = 3
 
 
 def paint(x):
+    return
     qlen = 25
     print(x)
-    return
     qres = [[None for y in range(2 * len(days) * maxPairCount)] for x in range(len(groups))]
     for i in range(len(days)):
         day = days[i]
