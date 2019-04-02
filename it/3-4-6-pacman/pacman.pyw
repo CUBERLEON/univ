@@ -1,5 +1,21 @@
-import pygame, sys, os, random
+import os
+import random
+import sys
+from memory_profiler import memory_usage
+
+import time
+from collections import deque
+
+import numpy as np
+import pygame
 from pygame.locals import *
+import Queue as Q
+
+sys.setrecursionlimit(10000)
+
+INPUT_METHOD = "min_max"
+EAT_GHOSTS = True
+MEM_PROFILE = False
 
 # WIN???
 SCRIPT_PATH = sys.path[0]
@@ -40,8 +56,8 @@ IMG_EDGE_SHADOW_COLOR = (0xff, 0x00, 0xff, 0xff)
 IMG_PELLET_COLOR = (0x80, 0x00, 0x80, 0xff)
 
 # Must come before pygame.init()
-pygame.mixer.pre_init(22050, 16, 2, 512)
-pygame.mixer.init()
+# pygame.mixer.pre_init(22050, 16, 2, 512)
+# pygame.mixer.init()
 
 clock = pygame.time.Clock()
 pygame.init()
@@ -53,14 +69,14 @@ screen = pygame.display.get_surface()
 
 img_Background = pygame.image.load(os.path.join(SCRIPT_PATH, "res", "backgrounds", "1.gif")).convert()
 
-snd_pellet = {}
-snd_pellet[0] = pygame.mixer.Sound(os.path.join(SCRIPT_PATH, "res", "sounds", "pellet1.wav"))
-snd_pellet[1] = pygame.mixer.Sound(os.path.join(SCRIPT_PATH, "res", "sounds", "pellet2.wav"))
-snd_powerpellet = pygame.mixer.Sound(os.path.join(SCRIPT_PATH, "res", "sounds", "powerpellet.wav"))
-snd_eatgh = pygame.mixer.Sound(os.path.join(SCRIPT_PATH, "res", "sounds", "eatgh2.wav"))
-snd_fruitbounce = pygame.mixer.Sound(os.path.join(SCRIPT_PATH, "res", "sounds", "fruitbounce.wav"))
-snd_eatfruit = pygame.mixer.Sound(os.path.join(SCRIPT_PATH, "res", "sounds", "eatfruit.wav"))
-snd_extralife = pygame.mixer.Sound(os.path.join(SCRIPT_PATH, "res", "sounds", "extralife.wav"))
+# snd_pellet = {}
+# snd_pellet[0] = pygame.mixer.Sound(os.path.join(SCRIPT_PATH, "res", "sounds", "pellet1.wav"))
+# snd_pellet[1] = pygame.mixer.Sound(os.path.join(SCRIPT_PATH, "res", "sounds", "pellet2.wav"))
+# snd_powerpellet = pygame.mixer.Sound(os.path.join(SCRIPT_PATH, "res", "sounds", "powerpellet.wav"))
+# snd_eatgh = pygame.mixer.Sound(os.path.join(SCRIPT_PATH, "res", "sounds", "eatgh2.wav"))
+# snd_fruitbounce = pygame.mixer.Sound(os.path.join(SCRIPT_PATH, "res", "sounds", "fruitbounce.wav"))
+# snd_eatfruit = pygame.mixer.Sound(os.path.join(SCRIPT_PATH, "res", "sounds", "eatfruit.wav"))
+# snd_extralife = pygame.mixer.Sound(os.path.join(SCRIPT_PATH, "res", "sounds", "extralife.wav"))
 
 ghostcolor = {}
 ghostcolor[0] = (255, 0, 0, 255)
@@ -211,7 +227,7 @@ class game():
 
         for specialScore in extraLifeSet:
             if self.score < specialScore and self.score + amount >= specialScore:
-                snd_extralife.play()
+                # snd_extralife.play()
                 thisGame.lives += 1
 
         self.score += amount
@@ -757,7 +773,7 @@ class fruit():
         elif self.bouncei == 16:
             self.bounceY = 0
             self.bouncei = 0
-            snd_fruitbounce.play()
+            # snd_fruitbounce.play()
 
         self.slowTimer += 1
         if self.slowTimer == 2:
@@ -807,10 +823,13 @@ class pacman():
         self.y = 0
         self.velX = 0
         self.velY = 0
-        self.speed = 3
+        self.speed = 6
 
         self.nearestRow = 0
         self.nearestCol = 0
+
+        self.dir_x = 0
+        self.dir_y = 0
 
         self.homeX = 0
         self.homeY = 0
@@ -835,11 +854,200 @@ class pacman():
 
         self.pelletSndNum = 0
 
-    def Move(self):
+    def FindDir(self):
+        assert INPUT_METHOD == 'dfs' or INPUT_METHOD == 'bfs' or INPUT_METHOD == 'greedy' or INPUT_METHOD == 'a_star'
 
+        visited = np.zeros((thisLevel.lvlHeight, thisLevel.lvlWidth), dtype=np.bool)
+
+        y = self.nearestRow
+        x = self.nearestCol
+
+        d_pos = [(1, 0), (-1, 0), (0, 1), (0, -1)]
+
+        target = (-100, -100)
+
+        def dist((y1, x1), (y2, x2)):
+            return abs(x1 - x2) + abs(y1 - y2)
+
+        if INPUT_METHOD == 'bfs':
+            q = deque()
+            visited[y, x] = True
+            q.append((0, (y, x)))
+        elif INPUT_METHOD == 'dfs' or INPUT_METHOD == 'greedy':
+            q = []
+            if (self.dir_x != 0 or self.dir_y != 0) and INPUT_METHOD == 'greedy':
+                d_pos = [(self.dir_x, self.dir_y), (-self.dir_x, -self.dir_y),
+                         (self.dir_y, self.dir_x), (-self.dir_y, -self.dir_x)]
+                d_pos.reverse()
+
+            visited[y, x] = True
+            q.append((0, (y, x)))
+        elif INPUT_METHOD == 'a_star':
+            q = Q.PriorityQueue()
+            priority = np.full((thisLevel.lvlHeight, thisLevel.lvlWidth), 100000000, dtype=np.int32)
+            priority[y, x] = 0 + dist((y, x), target)
+            q.put(((priority[y, x], 0), (y, x)))
+
+        parent = {}
+        path = []
+
+        iters_cnt = 0
+
+        start_timestamp = time.time()
+
+        while (isinstance(q, Q.PriorityQueue) and not q.empty()) or \
+              (not isinstance(q, Q.PriorityQueue) and q):
+            if INPUT_METHOD == 'bfs':
+                cur_dist, cur_pos = q.popleft()
+            elif INPUT_METHOD == 'dfs' or INPUT_METHOD == 'greedy':
+                cur_dist, cur_pos = q.pop()
+            elif INPUT_METHOD == 'a_star':
+                (cur_priority, cur_dist), cur_pos = q.get()
+
+                if visited[cur_pos[0], cur_pos[1]]:
+                    continue
+                visited[cur_pos[0], cur_pos[1]] = True
+
+            iters_cnt += 1
+
+            if (thisFruit.active and cur_pos == (thisFruit.nearestRow, thisFruit.nearestCol)) or \
+                    thisLevel.GetMapTile(cur_pos) == tileID['pellet'] or \
+                    thisLevel.GetMapTile(cur_pos) == tileID['pellet-power'] or \
+                    any([thisLevel.CheckIfHit((cur_pos[1] * TILE_WIDTH, cur_pos[0] * TILE_HEIGHT), (ghost.x, ghost.y),
+                                              TILE_WIDTH * 0.5)
+                         and ghost.state == 2 and EAT_GHOSTS for ghost in ghosts.values()]):
+                path.append(cur_pos)
+
+                while cur_pos in parent:
+                    cur_pos = parent[cur_pos]
+                    path.append(cur_pos)
+                path.reverse()
+
+                break
+
+            for k in range(4):
+                nxt_pos = ((cur_pos[0] + d_pos[k][0]) % thisLevel.lvlHeight,
+                           (cur_pos[1] + d_pos[k][1]) % thisLevel.lvlWidth)
+
+                if visited[nxt_pos[0], nxt_pos[1]]:
+                    continue
+                if thisLevel.IsWall(nxt_pos):
+                    continue
+                if any([thisLevel.CheckIfHit((nxt_pos[1] * TILE_WIDTH, nxt_pos[0] * TILE_HEIGHT), (ghost.x, ghost.y),
+                                             TILE_WIDTH * 1.5)
+                        and (ghost.state != 2 or not EAT_GHOSTS) for ghost in ghosts.values()]):
+                    # print('ENEMY SPOTTED', nxt_pos)
+                    continue
+
+                if INPUT_METHOD == 'bfs' or INPUT_METHOD == 'dfs' or INPUT_METHOD == 'greedy':
+                    visited[nxt_pos[0], nxt_pos[1]] = True
+                    parent[nxt_pos] = cur_pos
+                    q.append((cur_dist + 1, nxt_pos))
+                elif INPUT_METHOD == 'a_star':
+                    new_priority = cur_dist + 1 + dist(nxt_pos, target)
+                    if new_priority < priority[nxt_pos[0], nxt_pos[1]]:
+                        parent[nxt_pos] = cur_pos
+                        q.put(((new_priority, cur_dist + 1), nxt_pos))
+
+        end_timestamp = time.time()
+
+        print('path_len=%s, iters_cnt=%s time_spent=%.3fms' % (len(path), iters_cnt,
+                                                               (end_timestamp - start_timestamp) * 1000.))
+
+        if len(path) >= 2:
+            return path[1][1] - path[0][1], path[1][0] - path[0][0]
+        else:
+            return 0, 0
+
+    def FindDirMinMax(self):
+        assert INPUT_METHOD == "min_max"
+
+        max_depth = 20
+
+        visited = np.zeros((thisLevel.lvlHeight, thisLevel.lvlWidth), dtype=np.bool)
+        iters_cnt = [0]
+        y = self.nearestRow
+        x = self.nearestCol
+
+        def go(cur_pos, depth, ignored_dirs):
+            iters_cnt[0] += 1
+
+            d_pos = [(1, 0), (-1, 0), (0, 1), (0, -1)]
+
+            score = 0
+            if thisLevel.GetMapTile(cur_pos) == tileID['pellet']:
+                score += 1. / depth ** 2
+            if thisLevel.GetMapTile(cur_pos) == tileID['pellet-power']:
+                score += 1.3 / depth ** 2
+            if thisFruit.active and cur_pos == (thisFruit.nearestRow, thisFruit.nearestCol):
+                score += 2. / depth ** 2
+            for ghost in ghosts.values():
+                if not thisLevel.CheckIfHit((cur_pos[1] * TILE_WIDTH, cur_pos[0] * TILE_HEIGHT), (ghost.x, ghost.y), TILE_WIDTH * 0.5):
+                    continue
+                if ghost.state == 2 and EAT_GHOSTS:
+                    score += 1.3 / depth ** 2
+                else:
+                    score -= 3 / depth
+
+            if depth > max_depth:
+                return (0, 0), score
+
+            visited[cur_pos[0], cur_pos[1]] = 1
+
+            best_sub_score = -1000000
+            best_dir = (0, 0)
+
+            for k in range(4):
+                if d_pos[k] in ignored_dirs:
+                    continue
+
+                nxt_pos = ((cur_pos[0] + d_pos[k][0]) % thisLevel.lvlHeight,
+                           (cur_pos[1] + d_pos[k][1]) % thisLevel.lvlWidth)
+
+                if visited[nxt_pos[0], nxt_pos[1]]:
+                    continue
+                if thisLevel.IsWall(nxt_pos):
+                    continue
+                if any([thisLevel.CheckIfHit((nxt_pos[1] * TILE_WIDTH, nxt_pos[0] * TILE_HEIGHT), (ghost.x, ghost.y),
+                                             TILE_WIDTH * 1.5)
+                        and (ghost.state != 2 or not EAT_GHOSTS) for ghost in ghosts.values()]):
+                    continue
+
+                _, sub_score = go(nxt_pos, depth+1, [])
+                if sub_score > best_sub_score:
+                    best_dir, best_sub_score = d_pos[k], sub_score
+
+            visited[cur_pos[0], cur_pos[1]] = 0
+            return best_dir, best_sub_score + score
+
+        start_timestamp = time.time()
+        best_dir, best_score = go((y, x), 1, [(-self.dir_y, -self.dir_x)])
+        end_timestamp = time.time()
+
+        print('iters_cnt=%s score=%.3f time_spent=%.3fms' % (iters_cnt[0], best_score,
+                                                           (end_timestamp - start_timestamp) * 1000.))
+
+        return best_dir[1], best_dir[0]
+
+    def Inputs(self):
+        if INPUT_METHOD == "manual":
+            CheckInputs()
+            return
+
+        if self.x == self.nearestCol * TILE_WIDTH and self.y == self.nearestRow * TILE_HEIGHT:
+            if INPUT_METHOD == 'min_max':
+                self.dir_x, self.dir_y = self.FindDirMinMax()
+            else:
+                self.dir_x, self.dir_y = self.FindDir()
+
+        self.velX = self.dir_x * self.speed
+        self.velY = self.dir_y * self.speed
+
+    def UpdateCellPos(self):
         self.nearestRow = int(((self.y + (TILE_WIDTH / 2)) / TILE_WIDTH))
         self.nearestCol = int(((self.x + (TILE_HEIGHT / 2)) / TILE_HEIGHT))
 
+    def Move(self):
         # make sure the current velocity will not cause a collision before moving
         if not thisLevel.CheckIfHitWall((self.x + self.velX, self.y + self.velY), (self.nearestRow, self.nearestCol)):
             # it's ok to Move
@@ -864,7 +1072,7 @@ class pacman():
                         # make them run
                         thisGame.AddToScore(thisGame.ghostValue)
                         thisGame.ghostValue = thisGame.ghostValue * 2
-                        snd_eatgh.play()
+                        # snd_eatgh.play()
 
                         ghosts[i].state = 3
                         ghosts[i].speed = ghosts[i].speed * 4
@@ -885,7 +1093,7 @@ class pacman():
                     thisFruit.active = False
                     thisGame.fruitTimer = 0
                     thisGame.fruitScoreTimer = 120
-                    snd_eatfruit.play()
+                    # snd_eatfruit.play()
 
         else:
             # we're going to hit a wall -- stop moving
@@ -1037,7 +1245,7 @@ class level():
                     if result == tileID['pellet']:
                         # got a pellet
                         thisLevel.SetMapTile((iRow, iCol), 0)
-                        snd_pellet[player.pelletSndNum].play()
+                        # snd_pellet[player.pelletSndNum].play()
                         player.pelletSndNum = 1 - player.pelletSndNum
 
                         thisLevel.pellets -= 1
@@ -1053,8 +1261,8 @@ class level():
                     elif result == tileID['pellet-power']:
                         # got a power pellet
                         thisLevel.SetMapTile((iRow, iCol), 0)
-                        pygame.mixer.stop()
-                        snd_powerpellet.play()
+                        # pygame.mixer.stop()
+                        # snd_powerpellet.play()
 
                         thisGame.AddToScore(100)
                         thisGame.ghostValue = 200
@@ -1360,6 +1568,8 @@ class level():
         player.y = player.homeY
         player.velX = 0
         player.velY = 0
+        player.dir_x = 0
+        player.dir_y = 0
 
         player.anim_pacmanCurrent = player.anim_pacmanS
         player.animFrame = 3
@@ -1508,10 +1718,18 @@ while True:
 
     if thisGame.mode == 1:
         # normal gameplay mode
-        CheckInputs()
 
         thisGame.modeTimer += 1
+
+        if MEM_PROFILE:
+            mem_usage = memory_usage(player.Inputs)
+            print("mem_usage=%.3f KB" % max(mem_usage))
+        else:
+            player.Inputs()
+
         player.Move()
+        player.UpdateCellPos()
+
         for i in range(0, 4, 1):
             ghosts[i].Move()
         thisFruit.Move()
