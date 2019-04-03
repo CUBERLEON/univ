@@ -1,5 +1,7 @@
 from time import time
+import matplotlib.pyplot as plt
 
+import numpy as np
 from table import *
 
 
@@ -174,9 +176,30 @@ def constraint_prop():
 if __name__ == "__main__":
     func = [mrv, step_evr, lcv, forward_checking, constraint_prop]
 
-    print(f"req_cnt = {len(req)}, teacher_cnt = {len(teachers)}, groups_cnt = {len(groups)}")
+    print(f"req_cnt = {len(req)}, teacher_cnt = {len(teachers)}, groups_cnt = {len(groups)}, days_cnt = {len(days)}")
+
+    names = []
+    times = []
+    counts = list(range(1, 23))
+    orig_req = req.copy()
+    days = days[:2]
 
     for x in func:
-        t = time()
-        x()
-        print(f"func = {x.__name__}, time = {(time() - t) * 1000.:.3f}ms")
+        names.append(x.__name__)
+        times.append([])
+
+        for k in counts:
+            req = orig_req[len(orig_req)-k:]
+            t = time()
+            x()
+            dt = (time() - t) * 1000.
+            print(f"k = {k}, func = {x.__name__}, time = {dt:.3f}ms")
+            times[-1].append(dt)
+
+    plt.figure()
+    for i in range(len(func)):
+        plt.plot(counts, times[i])
+    plt.xlabel('#constraints')
+    plt.ylabel('time (ms)')
+    plt.legend(names)
+    plt.show()
